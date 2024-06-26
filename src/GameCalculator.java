@@ -7,8 +7,8 @@ public class GameCalculator {
     ArrayList<Game> allGamesPlayed = new ArrayList<>();
     Set<Player> playersUsed = new HashSet<>();
     boolean firstLoop = true;
-    double POINTSCAP = 1.75;
-    double POINTSFLOOR = 0.25;
+    double POINTSCAP = 1.5;
+    double POINTSFLOOR = 0.5;
 
     int ratingDiff;
     ArrayList<Player> players;
@@ -112,7 +112,7 @@ public class GameCalculator {
             Player p1 = players.get(p1Index);
             players.remove(p1);
 
-            int pivotRating = p1.getRating();
+            //int pivotRating = p1.getRating();
 
 
             /*for (Player p : players) {
@@ -123,8 +123,7 @@ public class GameCalculator {
                 }
             }*/
             HashSet<Player> ratingDiffSet = getPlayersInRatingDiff(p1, players, ratingDiff, p1Index);
-            ArrayList<Player> ratingDiffArray = new ArrayList();
-            ratingDiffArray.addAll(ratingDiffSet);
+            ArrayList<Player> ratingDiffArray = new ArrayList<>(ratingDiffSet);
 
             Player[] teams = new Player[10];
             teams[0] = p1;
@@ -167,19 +166,19 @@ public class GameCalculator {
             double medianLosingTeamPlayerSkill = game.getLosingTeam().getMedianSkillPlayer();
             for (Player p : game.getWinningTeam().getTeam()) {
                 p.addGameWon();
-
-                double expectedWinChanceWinner = Math.pow(10, (double) p.getRating() / 400) / (Math.pow(10, (double) p.getRating() / 400) + (Math.pow(10, game.getLosingTeam().getAvgRating() / 400)));
+                double expectedWinChanceWinner = Math.pow(10, ((double) p.getRating() / 400)) /
+                        (Math.pow(10, ((double) p.getRating() / 400)) + (Math.pow(10, (game.getLosingTeam().getAvgRating() / 400))));
                 //double E_winner = Math.abs(1 / (1.0 + Math.pow(10.0, (Math.abs(p.getRating() - game.getLosingTeam().getAvgRating()) / 400))));
                 double pointsGained;
                 double skillDividedByMedianWin = p.getSkill() / medianWinningTeamPlayerSkill;
                 if (skillDividedByMedianWin < POINTSCAP) {
                     if (skillDividedByMedianWin > POINTSFLOOR) {
-                        pointsGained = Math.abs(k * (0 - expectedWinChanceWinner)) * skillDividedByMedianWin;
+                        pointsGained = Math.abs(k * (1 - expectedWinChanceWinner)) * skillDividedByMedianWin;
                     } else {
-                        pointsGained = Math.abs(k * (0 - expectedWinChanceWinner)) * POINTSFLOOR;
+                        pointsGained = Math.abs(k * (1 - expectedWinChanceWinner)) * POINTSFLOOR;
                     }
                 } else {
-                    pointsGained = Math.abs(k * (0 - expectedWinChanceWinner)) * POINTSCAP;
+                    pointsGained = Math.abs(k * (1 - expectedWinChanceWinner)) * POINTSCAP;
                 }
                 p.setRating((int) (p.getRating() + Math.round(pointsGained)));
 
@@ -188,7 +187,8 @@ public class GameCalculator {
             }
             for (Player p : game.getLosingTeam().getTeam()) {
                 p.addGameLost();
-                double expectedWinChanceLoser = Math.pow(10, (double) p.getRating() / 400) / (Math.pow(10, (double) p.getRating() / 400) + (Math.pow(10, game.getWinningTeam().getAvgRating() / 400)));
+                double expectedWinChanceLoser = Math.pow(10, ((double) p.getRating() / 400)) /
+                        (Math.pow(10, ((double) p.getRating() / 400)) + (Math.pow(10, (game.getWinningTeam().getAvgRating() / 400))));
                 //double E_loser = Math.abs(1 / (1.0 + Math.pow(10.0, (Math.abs(p.getRating() - game.getWinningTeam().getAvgRating()) / 400))));
                 double pointsLost;
                 double skillDividedByMedianLost = medianLosingTeamPlayerSkill / p.getSkill();
@@ -202,8 +202,12 @@ public class GameCalculator {
                 } else {
                     pointsLost = Math.abs(k * (0 - expectedWinChanceLoser)) * POINTSFLOOR;
                 }
-                if (p.getRating() - pointsLost >= 25) {
+                if ((p.getRating() - pointsLost) >= 25) {
                     p.setRating((int) (p.getRating() - Math.round(pointsLost)));
+                }
+                else
+                {
+                    p.setRating(25);
                 }
                 playersUsed.add(p);
                 players.remove(p);
@@ -219,7 +223,7 @@ public class GameCalculator {
 
         players.addAll(playersUsed);
         outputPlayersToSQLPersonal(players);
-        if (allGamesPlayed.size() > 0) {
+        if (!allGamesPlayed.isEmpty()) {
             outputGamesToSQLPersonal(allGamesPlayed);
         }
     }
@@ -237,7 +241,7 @@ public class GameCalculator {
             if (gameNum % (gamesPlayed / 500) == 0 && gameNum != 0) {
                 outputGamesToSQL(allGamesPlayed);
             }
-            if (players.size() == 0) {
+            if (players.isEmpty()) {
                 players.addAll(playersUsed);
                 playersUsed.clear();
                 firstLoop = false;
@@ -247,11 +251,10 @@ public class GameCalculator {
             Player p1 = players.get(p1Index);
             players.remove(p1);
 
-            int pivotRating = p1.getRating();
+            //int pivotRating = p1.getRating();
 
             HashSet<Player> ratingDiffSet = getPlayersInRatingDiff(p1, players, ratingDiff, p1Index);
-            ArrayList<Player> ratingDiffArray = new ArrayList();
-            ratingDiffArray.addAll(ratingDiffSet);
+            ArrayList<Player> ratingDiffArray = new ArrayList<>(ratingDiffSet);
 
             Player[] teams = new Player[10];
             teams[0] = p1;
@@ -286,22 +289,27 @@ public class GameCalculator {
             allGamesPlayed.add(game);
             for (Player p : game.getWinningTeam().getTeam()) {
                 p.addGameWon();
-                double expectedWinChanceWinner = Math.pow(10, (double) p.getRating() / 400) / (Math.pow(10, (double) p.getRating() / 400) + (Math.pow(10, game.getLosingTeam().getAvgRating() / 400)));
-                double pointsGained;
+                //Ea = Qa / (Qa + Qb)
+                // Qa = 10^(Ra/400), Qb = 10^(Rb/400), Ra = rating player a, Rb = rating player B
+                double expectedWinChanceWinner = Math.pow(10, ((double) p.getRating() / 400)) /
+                        (Math.pow(10, ((double) p.getRating() / 400)) + (Math.pow(10, (game.getLosingTeam().getAvgRating() / 400))));
+                //points gained = k factor x (actual score - expected score)
+                int pointsGained = (int) Math.round(Math.abs(k * (1 - expectedWinChanceWinner)));
                 //double E_winner = 1 / (1.0 + Math.pow(10.0, ((game.getLosingTeam().getAvgRating() - p.getRating()) / 400)));
-                p.setRating((int) (p.getRating() + Math.round(Math.abs(k * (0 - expectedWinChanceWinner)))));
+                p.setRating(p.getRating() + pointsGained);
                 playersUsed.add(p);
                 players.remove(p);
             }
             for (Player p : game.getLosingTeam().getTeam()) {
                 p.addGameLost();
-                double expectedWinChanceLoser = Math.pow(10, (double) p.getRating() / 400) / (Math.pow(10, (double) p.getRating() / 400) + (Math.pow(10, game.getWinningTeam().getAvgRating() / 400)));
+                double expectedWinChanceLoser = Math.pow(10, ((double) p.getRating() / 400)) /
+                        (Math.pow(10, ((double) p.getRating() / 400)) + (Math.pow(10, (game.getWinningTeam().getAvgRating() / 400))));
                 double pointsLost = Math.round(Math.abs(k * (0 - expectedWinChanceLoser)));
                 //double E_loser = 1 / (1.0 + Math.pow(10.0, (game.getWinningTeam().getAvgRating() - p.getRating()) / 400));
                 if (p.getRating() - pointsLost >= 25) {
-                    p.setRating((p.getRating() - 25));
-                } else {
                     p.setRating((int) (p.getRating() - pointsLost));
+                } else {
+                    p.setRating(25);
                 }
                 playersUsed.add(p);
                 players.remove(p);
@@ -317,7 +325,7 @@ public class GameCalculator {
 
         players.addAll(playersUsed);
         outputPlayersToSQL(players);
-        if (allGamesPlayed.size() > 0) {
+        if (!allGamesPlayed.isEmpty()) {
             outputGamesToSQL(allGamesPlayed);
         }
     }
@@ -354,10 +362,8 @@ public class GameCalculator {
                /*for (int i : p.getEloHistory()) {
                     eloHistory.append(i).append(",");
                 }*/
-                StringBuilder eloHistory2 = new StringBuilder(eloHistory.substring(0, eloHistory.length() - 1));
-                eloHistory2.append("]");
 
-                stm.setObject(9, eloHistory2.toString());
+                stm.setObject(9, eloHistory.substring(0, eloHistory.length() - 1) + "]");
                 stm.addBatch();
                 //String sqlT1 = String.format("INSERT INTO playerlistPersonal (id, name, skill, rating, volatility, confidence, games_won, games_played, history) VALUES ('%s', '%s', '%s', '%s', '%s', '%s','%s', '%s','%s')", p.getUuid(), p.getName(), p.getSkill(), p.getRating(), p.getVolatility(), p.getConfidence(), p.getGamesWon(), p.getGamesPlayed(), eloHistory.toString());
 
