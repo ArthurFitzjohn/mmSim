@@ -6,14 +6,15 @@ import java.util.Set;
 public class Main {
     public static void main(String[] args) throws SQLException {
         PlayerGenerator playerGenerator = new PlayerGenerator();
-        Set<Player> players = playerGenerator.GeneratePlayers(150000);
+        Set<Player> players = playerGenerator.GeneratePlayers(15000);
 
 
         ArrayList<Player> playerList = new ArrayList<Player>(players);
+        ArrayList<Player> playerList2 = new ArrayList<Player>(players);
 
         int ratingDiff = 100;
-        GameCalculator gc = new GameCalculator(ratingDiff, playerList, 15000000);
-        GameCalculator gc2 = new GameCalculator(ratingDiff, playerList, 15000000);
+        GameCalculator gc = new GameCalculator(ratingDiff, playerList, 1500000);
+        GameCalculator gc2 = new GameCalculator(ratingDiff, playerList2, 1500000);
         gc.calculateGamesElo();
         gc2.calculateGamesPersonalSkill();
         //System.out.println("do you want to calculate games with normal elo (1) or personal skill (2)?");
