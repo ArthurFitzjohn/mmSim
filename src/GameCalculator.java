@@ -7,8 +7,8 @@ public class GameCalculator {
     ArrayList<Game> allGamesPlayed = new ArrayList<>();
     Set<Player> playersUsed = new HashSet<>();
     boolean firstLoop = true;
-    double POINTSCAP = 1.5;
-    double POINTSFLOOR = 0.5;
+    double POINTSCAP = 1.75;
+    double POINTSFLOOR = 0.25;
 
     int ratingDiff;
     ArrayList<Player> players;
