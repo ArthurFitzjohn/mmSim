@@ -360,14 +360,14 @@ public class GameCalculator {
             player.append(p.getGamesPlayed());
             player.append(",");
             StringBuilder eloHistory = new StringBuilder();
-            eloHistory.append("[");
+            eloHistory.append("\"[");
             for (int i : p.getEloHistory())
             {
                 eloHistory.append(i);
                 eloHistory.append(",");
             }
             eloHistory = new StringBuilder(eloHistory.substring(0, eloHistory.length() - 1));
-            eloHistory.append("]");
+            eloHistory.append("]\"");
 
             player.append(eloHistory);
             player.append("\n");
@@ -400,14 +400,14 @@ public class GameCalculator {
             player.append(p.getGamesPlayed());
             player.append(",");
             StringBuilder eloHistory = new StringBuilder();
-            eloHistory.append("[");
+            eloHistory.append("\"[");
             for (int i : p.getEloHistory())
             {
                 eloHistory.append(i);
                 eloHistory.append(",");
             }
             eloHistory = new StringBuilder(eloHistory.substring(0, eloHistory.length() - 1));
-            eloHistory.append("]");
+            eloHistory.append("]\"");
 
             player.append(eloHistory);
             player.append("\n");
@@ -424,11 +424,11 @@ public class GameCalculator {
         for (Game g : games) {
             String truncatedUUID = g.getGameID().toString().replaceAll("-", "");
             sb.append(truncatedUUID);
-            sb.append(",");
+            sb.append(",\"");
             sb.append(g.getWinningTeam().getNames());
-            sb.append(",");
+            sb.append("\",\"");
             sb.append(g.getLosingTeam().getNames());
-            sb.append("\n");
+            sb.append("\"\n");
         }
         bw.append(sb.toString());
     }
@@ -443,11 +443,11 @@ public class GameCalculator {
         for (Game g : games) {
             String truncatedUUID = g.getGameID().toString().replaceAll("-", "");
             sb.append(truncatedUUID);
-            sb.append(",");
+            sb.append(",\"");
             sb.append(g.getWinningTeam().getNames());
-            sb.append(",");
+            sb.append("\",\"");
             sb.append(g.getLosingTeam().getNames());
-            sb.append("\n");
+            sb.append("\"\n");
         }
         bw.append(sb.toString());
     }
