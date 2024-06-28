@@ -1,3 +1,8 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
 //Created by S1ft 2024
@@ -7,8 +12,8 @@ public class GameCalculator {
     ArrayList<Game> allGamesPlayed = new ArrayList<>();
     Set<Player> playersUsed = new HashSet<>();
     boolean firstLoop = true;
-    double POINTSCAP = 1.75;
-    double POINTSFLOOR = 0.25;
+    double POINTSCAP = 1.5;
+    double POINTSFLOOR = 0.5;
 
     int ratingDiff;
     ArrayList<Player> players;
@@ -88,7 +93,7 @@ public class GameCalculator {
         this.gamesPlayed = gamesPlayed;
     }
 
-    public void calculateGamesPersonalSkill() throws SQLException {
+    public void calculateGamesPersonalSkill() throws SQLException, IOException {
         int k = 50;
         Random rng = new Random();
 
@@ -99,7 +104,7 @@ public class GameCalculator {
                 System.out.println(gameNum);
             }
             if (gameNum % (gamesPlayed / 500) == 0 && gameNum != 0) {
-                outputGamesToSQLPersonal(allGamesPlayed);
+                outputGamesPersonalToCSV(allGamesPlayed);
             }
             if (players.isEmpty()) {
                 players.addAll(playersUsed);
@@ -219,16 +224,16 @@ public class GameCalculator {
         long endTime = System.nanoTime();
         long totalTime = endTime - startTime;
         System.out.println("seconds taken: " + totalTime / 1000000000);
-        System.out.println("finished Simulating " + allGamesPlayed.size() * 50 + " games");
+        System.out.println("finished Simulating " + allGamesPlayed.size() * 500 + " games");
 
         players.addAll(playersUsed);
-        outputPlayersToSQLPersonal(players);
+        outputPlayersPersonalToCSV(players);
         if (!allGamesPlayed.isEmpty()) {
-            outputGamesToSQLPersonal(allGamesPlayed);
+            outputGamesPersonalToCSV(allGamesPlayed);
         }
     }
 
-    public void calculateGamesElo() throws SQLException {
+    public void calculateGamesElo() throws SQLException, IOException {
         int k = 50;
         Random rng = new Random();
 
@@ -239,7 +244,7 @@ public class GameCalculator {
                 System.out.println(gameNum);
             }
             if (gameNum % (gamesPlayed / 500) == 0 && gameNum != 0) {
-                outputGamesToSQL(allGamesPlayed);
+                outputGamesToCSV(allGamesPlayed);
             }
             if (players.isEmpty()) {
                 players.addAll(playersUsed);
@@ -324,10 +329,127 @@ public class GameCalculator {
         System.out.println("finished Simulating " + allGamesPlayed.size() * 50 + " games");
 
         players.addAll(playersUsed);
-        outputPlayersToSQL(players);
+        outputPlayersToCSV(players);
         if (!allGamesPlayed.isEmpty()) {
-            outputGamesToSQL(allGamesPlayed);
+            outputGamesToCSV(allGamesPlayed);
         }
+    }
+
+    public void outputPlayersToCSV(ArrayList<Player> players) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter("playerlist.csv"));
+
+        if(!Files.exists(Path.of("playerlist.csv")))
+        {
+            bw.write("id,name,skill,rating,volatility,confidence,games_won,games_played,history\n");
+        }
+        StringBuilder player = new StringBuilder();
+        for (Player p : players) {
+            String truncatedUUID = p.getUuid().toString().replaceAll("-", "");
+            player.append(truncatedUUID);
+            player.append(",");
+            player.append(p.getName());
+            player.append(",");
+            player.append(p.getRating());
+            player.append(",");
+            player.append(p.getVolatility());
+            player.append(",");
+            player.append(p.getConfidence());
+            player.append(",");
+            player.append(p.getGamesWon());
+            player.append(",");
+            player.append(p.getGamesPlayed());
+            player.append(",");
+            StringBuilder eloHistory = new StringBuilder();
+            eloHistory.append("[");
+            for (int i : p.getEloHistory())
+            {
+                eloHistory.append(i);
+                eloHistory.append(",");
+            }
+            eloHistory = new StringBuilder(eloHistory.substring(0, eloHistory.length() - 1));
+            eloHistory.append("]");
+
+            player.append(eloHistory);
+            player.append("\n");
+        }
+        bw.append(player.toString());
+    }
+
+    public void outputPlayersPersonalToCSV(ArrayList<Player> players) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter("playerlistpersonal.csv"));
+
+        if(!Files.exists(Path.of("/playerlistpersonal.csv")))
+        {
+            bw.write("id,name,skill,rating,volatility,confidence,games_won,games_played,history\n");
+        }
+        StringBuilder player = new StringBuilder();
+        for (Player p : players) {
+            String truncatedUUID = p.getUuid().toString().replaceAll("-", "");
+            player.append(truncatedUUID);
+            player.append(",");
+            player.append(p.getName());
+            player.append(",");
+            player.append(p.getRating());
+            player.append(",");
+            player.append(p.getVolatility());
+            player.append(",");
+            player.append(p.getConfidence());
+            player.append(",");
+            player.append(p.getGamesWon());
+            player.append(",");
+            player.append(p.getGamesPlayed());
+            player.append(",");
+            StringBuilder eloHistory = new StringBuilder();
+            eloHistory.append("[");
+            for (int i : p.getEloHistory())
+            {
+                eloHistory.append(i);
+                eloHistory.append(",");
+            }
+            eloHistory = new StringBuilder(eloHistory.substring(0, eloHistory.length() - 1));
+            eloHistory.append("]");
+
+            player.append(eloHistory);
+            player.append("\n");
+        }
+        bw.append(player.toString());
+    }
+
+    public void outputGamesToCSV (ArrayList<Game> games) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter("games.csv"));
+        if(!Files.exists(Path.of("/games.csv"))) {
+            bw.append("game_id, winning_team, losing_team\n");
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Game g : games) {
+            String truncatedUUID = g.getGameID().toString().replaceAll("-", "");
+            sb.append(truncatedUUID);
+            sb.append(",");
+            sb.append(g.getWinningTeam().getNames());
+            sb.append(",");
+            sb.append(g.getLosingTeam().getNames());
+            sb.append("\n");
+        }
+        bw.append(sb.toString());
+    }
+
+    public void outputGamesPersonalToCSV (ArrayList<Game> games) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter("gamespersonal.csv"));
+
+        if(!Files.exists(Path.of("/gamespersonal.csv"))) {
+            bw.append("game_id, winning_team, losing_team\n");
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Game g : games) {
+            String truncatedUUID = g.getGameID().toString().replaceAll("-", "");
+            sb.append(truncatedUUID);
+            sb.append(",");
+            sb.append(g.getWinningTeam().getNames());
+            sb.append(",");
+            sb.append(g.getLosingTeam().getNames());
+            sb.append("\n");
+        }
+        bw.append(sb.toString());
     }
 
     public void outputPlayersToSQLPersonal(ArrayList<Player> players) {
