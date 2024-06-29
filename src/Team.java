@@ -37,7 +37,7 @@ public class Team {
         this.skills.add(player5.getSkill());
         Collections.sort(skills);
         this.avgSkill = (player1.getSkill()+player2.getSkill()+player3.getSkill()+player4.getSkill()+player5.getSkill())/5;
-        this.avgRating = (player1.getRating()+player2.getRating()+player3.getRating()+player4.getRating()+player5.getRating())/5;
+        this.avgRating = (double) (player1.getRating() + player2.getRating() + player3.getRating() + player4.getRating() + player5.getRating()) /5;
         this.team = new Player[]{player1, player2, player3, player4, player5};
     }
 

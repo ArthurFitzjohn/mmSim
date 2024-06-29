@@ -342,8 +342,8 @@ public class GameCalculator {
         {
             bw.write("id,name,skill,rating,volatility,confidence,games_won,games_played,history\n");
         }
-        StringBuilder player = new StringBuilder();
         for (Player p : players) {
+            StringBuilder player = new StringBuilder();
             String truncatedUUID = p.getUuid().toString().replaceAll("-", "");
             player.append(truncatedUUID);
             player.append(",");
@@ -371,19 +371,21 @@ public class GameCalculator {
 
             player.append(eloHistory);
             player.append("\n");
+            bw.append(player.toString());
         }
-        bw.append(player.toString());
+
+        bw.close();
     }
 
     public void outputPlayersPersonalToCSV(ArrayList<Player> players) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter("playerlistpersonal.csv"));
 
-        if(!Files.exists(Path.of("/playerlistpersonal.csv")))
+        if(!Files.exists(Path.of("playerlistpersonal.csv")))
         {
             bw.write("id,name,skill,rating,volatility,confidence,games_won,games_played,history\n");
         }
-        StringBuilder player = new StringBuilder();
         for (Player p : players) {
+            StringBuilder player = new StringBuilder();
             String truncatedUUID = p.getUuid().toString().replaceAll("-", "");
             player.append(truncatedUUID);
             player.append(",");
@@ -411,17 +413,27 @@ public class GameCalculator {
 
             player.append(eloHistory);
             player.append("\n");
+            bw.append(player.toString());
         }
-        bw.append(player.toString());
+
+        bw.close();
     }
 
     public void outputGamesToCSV (ArrayList<Game> games) throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter("games.csv"));
-        if(!Files.exists(Path.of("/games.csv"))) {
-            bw.append("game_id, winning_team, losing_team\n");
+        FileWriter fw;
+        if(!Files.exists(Path.of("games.csv"))) {
+            fw = new FileWriter("games.csv");
         }
-        StringBuilder sb = new StringBuilder();
+        else
+        {
+            fw = new FileWriter("games.csv", true);
+        }
+        BufferedWriter bw = new BufferedWriter(fw);
+        if(!Files.exists(Path.of("games.csv"))) {
+            bw.write("game_id, winning_team, losing_team\n");
+        }
         for (Game g : games) {
+            StringBuilder sb = new StringBuilder();
             String truncatedUUID = g.getGameID().toString().replaceAll("-", "");
             sb.append(truncatedUUID);
             sb.append(",\"");
@@ -429,18 +441,31 @@ public class GameCalculator {
             sb.append("\",\"");
             sb.append(g.getLosingTeam().getNames());
             sb.append("\"\n");
+            bw.append(sb.toString());
         }
-        bw.append(sb.toString());
+
+        bw.close();
+        fw.close();
+        allGamesPlayed.clear();
     }
 
     public void outputGamesPersonalToCSV (ArrayList<Game> games) throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter("gamespersonal.csv"));
-
-        if(!Files.exists(Path.of("/gamespersonal.csv"))) {
-            bw.append("game_id, winning_team, losing_team\n");
+        FileWriter fw;
+        if(!Files.exists(Path.of("games.csv"))) {
+            fw = new FileWriter("games.csv");
         }
-        StringBuilder sb = new StringBuilder();
+        else
+        {
+            fw = new FileWriter("games.csv", true);
+        }
+
+        BufferedWriter bw = new BufferedWriter(fw);
+
+        if(!Files.exists(Path.of("gamespersonal.csv"))) {
+            bw.write("game_id, winning_team, losing_team\n");
+        }
         for (Game g : games) {
+            StringBuilder sb = new StringBuilder();
             String truncatedUUID = g.getGameID().toString().replaceAll("-", "");
             sb.append(truncatedUUID);
             sb.append(",\"");
@@ -448,8 +473,11 @@ public class GameCalculator {
             sb.append("\",\"");
             sb.append(g.getLosingTeam().getNames());
             sb.append("\"\n");
+            bw.append(sb.toString());
         }
-        bw.append(sb.toString());
+        bw.close();
+        fw.close();
+        allGamesPlayed.clear();
     }
 
     public void outputPlayersToSQLPersonal(ArrayList<Player> players) {
